@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - HealthCare Pro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root { --primary:#0d6efd; --bg:#f5f7fb; }
+    body { background: var(--bg); }
+    .sidebar { position: fixed; top:0; bottom:0; left:0; width:250px; background:#fff; border-right:1px solid #e9ecef; padding:1rem; }
+    .content { margin-left:250px; padding:1.5rem; }
+    .brand { font-weight:700; font-size:1.25rem; color:var(--primary); }
+    .nav-link { color:#495057; border-radius:.5rem; }
+    .nav-link.active, .nav-link:hover { background:#eef4ff; color:#0b5ed7; }
+    .stat-card { border:0; border-radius:1rem; box-shadow:0 6px 18px rgba(0,0,0,.06); }
+    .table-card { border:0; border-radius:1rem; box-shadow:0 6px 18px rgba(0,0,0,.06); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar d-flex flex-column gap-3">
+    <div class="d-flex align-items-center justify-content-between">
+      <span class="brand"><i class="fa-solid fa-stethoscope me-2"></i>HealthCare Pro</span>
+      <button id="logoutBtn" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+    <hr>
+    <nav class="nav flex-column">
+      <a class="nav-link active" data-target="#overview" href="#">Overview</a>
+      <a class="nav-link" data-target="#consultations" href="#">Consultations</a>
+      <a class="nav-link" data-target="#appointments" href="#">Appointments</a>
+      <a class="nav-link" data-target="#payments" href="#">Payments</a>
+      <a class="nav-link" data-target="#admins" href="#">Admins</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h2 class="mb-0">Dashboard</h2>
+      <div class="text-muted">Signed in as <span id="adminName">admin</span></div>
+    </div>
+
+    <section id="overview" class="mb-4">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">New Consults</small>
+                <h3 class="mb-0" id="metricConsults">0</h3>
+              </div>
+              <div class="text-primary"><i class="fa-solid fa-laptop-medical fa-2x"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">Appointments</small>
+                <h3 class="mb-0" id="metricAppointments">0</h3>
+              </div>
+              <div class="text-success"><i class="fa-solid fa-calendar-check fa-2x"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">Patients</small>
+                <h3 class="mb-0" id="metricPatients">0</h3>
+              </div>
+              <div class="text-info"><i class="fa-solid fa-users fa-2x"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <small class="text-muted">Total Revenue</small>
+                <h3 class="mb-0" id="metricRevenue">$0</h3>
+              </div>
+              <div class="text-success"><i class="fa-solid fa-dollar-sign fa-2x"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="consultations" class="mb-4" style="display:none;">
+      <div class="card table-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fa-solid fa-laptop-medical me-2"></i>Online Consultations</h5>
+          <button class="btn btn-sm btn-outline-secondary" id="exportConsults">Export CSV</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th><th>Email</th><th>Phone</th><th>Specialty</th><th>Symptoms</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="consultsTableBody">
+                <!-- Filled dynamically from localStorage (demo data if empty) -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="appointments" class="mb-4" style="display:none;">
+      <div class="card table-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fa-solid fa-calendar-check me-2"></i>Offline Appointments</h5>
+          <button class="btn btn-sm btn-outline-secondary" id="exportAppointments">Export CSV</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th><th>Email</th><th>Phone</th><th>Doctor</th><th>Date</th><th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="payments" class="mb-4" style="display:none;">
+      <div class="card table-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fa-solid fa-credit-card me-2"></i>Payment Records</h5>
+          <button class="btn btn-sm btn-outline-secondary" id="exportPayments">Export CSV</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Transaction ID</th><th>Customer Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Amount</th><th>Payment Method</th><th>Date</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="paymentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="admins" style="display:none;">
+      <div class="card table-card">
+        <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-user-shield me-2"></i>Registered Admins</h5></div>
+        <div class="card-body p-0">
+          <table class="table align-middle mb-0">
+            <thead class="table-light"><tr><th>Full Name</th><th>Username</th><th>Email</th><th>Created</th></tr></thead>
+            <tbody id="adminsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function resolveApiBase() {
+      const cached = localStorage.getItem('api_base');
+      if (cached) return cached;
+      const ports = [3000,3001,3002];
+      for (const p of ports) {
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(()=>ctrl.abort(),1200);
+          const res = await fetch(`http://localhost:${p}/api/health`, { signal: ctrl.signal });
+          clearTimeout(t);
+          if (res.ok) {
+            const base = `http://localhost:${p}`;
+            localStorage.setItem('api_base', base);
+            return base;
+          }
+        } catch(e){}
+      }
+      throw new Error('API not reachable');
+    }
+    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    async function ensureAuth() {
+      if (!token) {
+        return window.location.replace('login.html');
+      }
+      try {
+        const API_BASE = await resolveApiBase();
+        const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error('unauthorized');
+        const me = await res.json();
+        if ((me.role || 'user') !== 'admin') {
+          throw new Error('forbidden');
+        }
+        document.getElementById('adminName').textContent = me.fullName || me.username || 'Admin';
+      } catch (e) {
+        // invalid token
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
+        window.location.replace('login.html');
+      }
+    }
+    // kick off auth check
+    ensureAuth();
+
+    // Sidebar nav switching
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        a.classList.add('active');
+        const target = a.getAttribute('data-target');
+        document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
+        document.querySelector(target).style.display = '';
+      });
+    });
+
+    // Storage helpers (fallback only)
+    function getAdmins(){ try { return JSON.parse(localStorage.getItem('admins')) || []; } catch { return []; } }
+    function getConsults(){ try { return JSON.parse(localStorage.getItem('consults')) || []; } catch { return []; } }
+    function getAppointments(){ try { return JSON.parse(localStorage.getItem('appointments')) || []; } catch { return []; } }
+    function getPayments(){ try { return JSON.parse(localStorage.getItem('payments')) || []; } catch { return []; } }
+
+    // Latest loaded data (for export)
+    let lastConsults = [];
+    let lastAppointments = [];
+    let lastPayments = [];
+
+    // Update Patients metric as unique people across consults + appointments
+    function updatePatientCount(){
+      try {
+        const set = new Set();
+        const addKey = (obj) => {
+          if (!obj) return;
+          const email = (obj.email || '').trim().toLowerCase();
+          const phone = (obj.phone || '').replace(/\D+/g,'');
+          const name = (obj.name || '').trim().toLowerCase();
+          // Prefer email/phone; fall back to name+date combo if needed
+          const key = email || phone ? `${email}|${phone}` : `${name}|${obj.date || obj.createdAt || ''}`;
+          set.add(key);
+        };
+        (lastConsults || []).forEach(addKey);
+        (lastAppointments || []).forEach(addKey);
+        const mp = document.getElementById('metricPatients');
+        if (mp) mp.textContent = String(set.size);
+      } catch (e) {
+        // noop
+      }
+    }
+
+    // Render tables
+    function renderConsults(items){
+      lastConsults = items || [];
+      const rows = lastConsults.map(c => `<tr><td>${c.name}</td><td>${c.email}</td><td>${c.phone}</td><td>${c.specialty}</td><td>${c.symptoms}</td><td>${new Date(c.date || c.createdAt || Date.now()).toLocaleString()}</td></tr>`).join('');
+      document.getElementById('consultsTableBody').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No data</td></tr>';
+      const mc = document.getElementById('metricConsults');
+      if (mc) mc.textContent = String(lastConsults.length);
+      updatePatientCount();
+    }
+    function renderAppointments(items){
+      lastAppointments = items || [];
+      const rows = lastAppointments.map(a => `<tr><td>${a.name}</td><td>${a.email}</td><td>${a.phone}</td><td>${a.doctor}</td><td>${a.date}</td><td>${a.time}</td></tr>`).join('');
+      document.getElementById('appointmentsTableBody').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No data</td></tr>';
+      const ma = document.getElementById('metricAppointments');
+      if (ma) ma.textContent = String(lastAppointments.length);
+      updatePatientCount();
+    }
+    function renderAdmins(items){
+      const admins = items && items.length ? items : getAdmins();
+      const rows = admins.map(u => `<tr><td>${u.fullName}</td><td>${u.username}</td><td>${u.email}</td><td>${new Date(u.createdAt).toLocaleString()}</td></tr>`).join('');
+      document.getElementById('adminsTableBody').innerHTML = rows || '<tr><td colspan="4" class="text-center text-muted">No admins registered</td></tr>';
+    }
+    function renderPayments(items){
+      lastPayments = items || [];
+      const rows = lastPayments.map(p => {
+        const itemsList = p.items ? p.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : 'N/A';
+        const statusBadge = p.status === 'completed' ? '<span class="badge bg-success">Completed</span>' : '<span class="badge bg-warning">Pending</span>';
+        return `<tr>
+          <td><small>${p.transactionId || 'N/A'}</small></td>
+          <td>${p.customerName || 'N/A'}</td>
+          <td>${p.customerEmail || 'N/A'}</td>
+          <td>${p.customerPhone || 'N/A'}</td>
+          <td><small>${itemsList}</small></td>
+          <td><strong>$${parseFloat(p.totalAmount || 0).toFixed(2)}</strong></td>
+          <td>${p.paymentMethod || 'N/A'}</td>
+          <td>${new Date(p.date || Date.now()).toLocaleString()}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('paymentsTableBody').innerHTML = rows || '<tr><td colspan="9" class="text-center text-muted">No payment records</td></tr>';
+      
+      // Update revenue metric
+      const totalRevenue = lastPayments.reduce((sum, p) => sum + (parseFloat(p.totalAmount) || 0), 0);
+      const revenueEl = document.getElementById('metricRevenue');
+      if (revenueEl) revenueEl.textContent = '$' + totalRevenue.toFixed(2);
+    }
+
+    // Fetch data from backend with JWT, fallback to localStorage
+    async function loadData(){
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const API_BASE = await resolveApiBase();
+        const [cRes, aRes, pRes, uRes] = await Promise.all([
+          fetch(`${API_BASE}/api/consults`, { headers }),
+          fetch(`${API_BASE}/api/appointments`, { headers }),
+          fetch(`${API_BASE}/api/payments`, { headers }),
+          fetch(`${API_BASE}/api/admins`, { headers })
+        ]);
+        let consults = [];
+        let appointments = [];
+        let payments = [];
+        let admins = [];
+        if (cRes.ok) { const cj = await cRes.json(); consults = cj.items || []; }
+        if (aRes.ok) { const aj = await aRes.json(); appointments = aj.items || []; }
+        if (pRes.ok) { const pj = await pRes.json(); payments = pj.items || []; }
+        if (uRes.ok) { const uj = await uRes.json(); admins = uj.items || []; }
+        if (consults.length === 0) consults = getConsults();
+        if (appointments.length === 0) appointments = getAppointments();
+        if (payments.length === 0) payments = getPayments();
+        renderAdmins(admins);
+        renderConsults(consults);
+        renderAppointments(appointments);
+        renderPayments(payments);
+        updatePatientCount();
+      } catch (e) {
+        renderAdmins(getAdmins());
+        renderConsults(getConsults());
+        renderAppointments(getAppointments());
+        renderPayments(getPayments());
+        updatePatientCount();
+      }
+    }
+    loadData();
+
+    // Export helpers
+    function downloadCSV(filename, rows, headers){
+      const escape = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+      const csv = [headers.join(','), ...rows.map(r => headers.map(h => escape(r[h])).join(','))].join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+    }
+    document.getElementById('exportConsults').addEventListener('click',()=>{
+      const data = lastConsults.length ? lastConsults : getConsults();
+      downloadCSV('consultations.csv', data, ['name','email','phone','specialty','symptoms','date']);
+    });
+    document.getElementById('exportAppointments').addEventListener('click',()=>{
+      const data = lastAppointments.length ? lastAppointments : getAppointments();
+      downloadCSV('appointments.csv', data, ['name','email','phone','doctor','date','time']);
+    });
+    document.getElementById('exportPayments').addEventListener('click',()=>{
+      const data = lastPayments.length ? lastPayments : getPayments();
+      const flattened = data.map(p => ({
+        transactionId: p.transactionId || '',
+        customerName: p.customerName || '',
+        customerEmail: p.customerEmail || '',
+        customerPhone: p.customerPhone || '',
+        items: p.items ? p.items.map(i => `${i.name} x${i.quantity}`).join('; ') : '',
+        totalAmount: p.totalAmount || 0,
+        paymentMethod: p.paymentMethod || '',
+        date: p.date || '',
+        status: p.status || ''
+      }));
+      downloadCSV('payments.csv', flattened, ['transactionId','customerName','customerEmail','customerPhone','items','totalAmount','paymentMethod','date','status']);
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click',()=>{
+      localStorage.removeItem('auth_token');
+      sessionStorage.removeItem('auth_token');
+      window.location.replace('login.html');
+    });
+  </script>
+</body>
+</html>

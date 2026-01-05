@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - HealthCare Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --dark-color: #212529;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 2rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .forgot-password a {
+            color: var(--dark-color);
+            text-decoration: none;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-user-md"></i>
+            <h2>Admin Login</h2>
+            <p class="text-muted">Please sign in to access the dashboard</p>
+        </div>
+        
+        <form id="adminLoginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control" id="username" placeholder="Enter your username" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+            
+            <div class="forgot-password mt-3">
+                <a href="#">Forgot password?</a>
+            </div>
+            <div class="text-center mt-2">
+                <a href="signup.html">Create an account</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function resolveApiBase() {
+            const cached = localStorage.getItem('api_base');
+            if (cached) return cached;
+            const ports = [3000, 3001, 3002];
+            for (const p of ports) {
+                try {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 1200);
+                    const res = await fetch(`http://localhost:${p}/api/health`, { signal: ctrl.signal });
+                    clearTimeout(t);
+                    if (res.ok) {
+                        const base = `http://localhost:${p}`;
+                        localStorage.setItem('api_base', base);
+                        return base;
+                    }
+                } catch (e) { /* try next */ }
+            }
+            throw new Error('API not reachable');
+        }
+
+        // Toggle password visibility
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+
+        // Handle login via backend
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const pwd = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            try {
+                const API_BASE = await resolveApiBase();
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password: pwd })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(()=>({message:'Login failed'}));
+                    return alert(err.message || 'Login failed');
+                }
+                const data = await res.json();
+                // Persist token; use localStorage if rememberMe, else sessionStorage
+                if (rememberMe) {
+                    localStorage.setItem('auth_token', data.token);
+                } else {
+                    sessionStorage.setItem('auth_token', data.token);
+                }
+                // Optional: store user display name
+                sessionStorage.setItem('current_admin_name', data.user?.fullName || data.user?.username || 'Admin');
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert('Network error. Ensure backend is running on http://localhost:3000');
+            }
+        });
+
+        // Show signup success toast if redirected from signup
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('signup_success') === '1') {
+                alert('Signup successful! Please sign in.');
+                sessionStorage.removeItem('signup_success');
+            }
+        });
+    </script>
+</body>
+</html>

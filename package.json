@@ -1,0 +1,14 @@
+{
+  "name": "healthcare-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root package to simplify running the backend from project root",
+  "scripts": {
+    "start": "node backend/server.js",
+    "backend": "npm --prefix backend start",
+    "install-backend": "npm --prefix backend install"
+  },
+  "dependencies": {
+    "mongod": "^2.0.0"
+  }
+}
