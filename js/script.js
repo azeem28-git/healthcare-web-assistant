@@ -382,7 +382,7 @@ async function initMedicineStore() {
             const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
             cartModal.hide();
             const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-            document.getElementById('paymentTotal').textContent = `$${getCartTotal().toFixed(2)}`;
+            document.getElementById('paymentTotal').textContent = `₹${getCartTotal().toFixed(2)}`;
             paymentModal.show();
         });
     }
@@ -440,7 +440,7 @@ function renderMedicines(meds) {
                             <div class="mb-3" style="font-size: 3rem;">${med.image || '💊'}</div>
                             <h5 class="card-title">${med.name || 'Unknown'}</h5>
                             <p class="text-muted small mb-2">${med.category || 'Uncategorized'}</p>
-                            <p class="text-primary fw-bold mb-2">$${price.toFixed(2)}</p>
+                            <p class="text-primary fw-bold mb-2">₹${price.toFixed(2)}</p>
                             <p class="text-muted small mb-3">Stock: ${stock}</p>
                             <button class="btn btn-primary btn-sm w-100" onclick="window.addToCart(${med.id})" ${stock === 0 ? 'disabled' : ''}>
                                 <i class="fas fa-cart-plus"></i> Add to Cart
@@ -512,7 +512,7 @@ function renderCart() {
 
     if (cart.length === 0) {
         cartItems.innerHTML = '<p class="text-center text-muted">Your cart is empty</p>';
-        if (cartTotal) cartTotal.textContent = '$0.00';
+        if (cartTotal) cartTotal.textContent = '₹0.00';
         return;
     }
 
@@ -520,7 +520,7 @@ function renderCart() {
         <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
             <div>
                 <h6 class="mb-1">${item.name || 'Unknown'}</h6>
-                <small class="text-muted">$${(parseFloat(item.price) || 0).toFixed(2)} each</small>
+                <small class="text-muted">₹${(parseFloat(item.price) || 0).toFixed(2)} each</small>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2">
@@ -529,7 +529,7 @@ function renderCart() {
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.updateCartQuantity(${item.id}, 1)">+</button>
                 </div>
                 <div class="text-end">
-                    <strong>$${((parseFloat(item.price) || 0) * (item.quantity || 0)).toFixed(2)}</strong>
+                    <strong>₹${((parseFloat(item.price) || 0) * (item.quantity || 0)).toFixed(2)}</strong>
                 </div>
                 <button class="btn btn-sm btn-danger" onclick="window.removeFromCart(${item.id})">
                     <i class="fas fa-trash"></i>
@@ -539,7 +539,7 @@ function renderCart() {
     `).join('');
 
     if (cartTotal) {
-        cartTotal.textContent = `$${getCartTotal().toFixed(2)}`;
+        cartTotal.textContent = `₹${getCartTotal().toFixed(2)}`;
     }
 }
 
