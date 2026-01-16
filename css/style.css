@@ -34,8 +34,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                url('../images/hero-bg.jpg') no-repeat center center/cover;
+    background: linear-gradient(rgba(66, 64, 64, 0.7), rgba(99, 76, 76, 0.7)),
+                url('/healthcare.jpeg') no-repeat center center/cover;
     color: white;
     height: 80vh;
     display: flex;
@@ -292,3 +292,4 @@ footer a:hover {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
+
