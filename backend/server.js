@@ -7,17 +7,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-// Import database connection
+
 const connectDB = require('./config/database');
 
-// Import models
+
 const User = require('./models/User');
 const Consult = require('./models/Consult');
 const Appointment = require('./models/Appointment');
 const Medicine = require('./models/Medicine');
 const Payment = require('./models/Payment');
 
-// Connect to MongoDB
+// Connect karre MongoDb
 connectDB();
 
 const app = express();
@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 const ADMIN_SIGNUP_CODE = process.env.ADMIN_SIGNUP_CODE || '';
 
-// Basic CORS to allow file:// origins and localhost
+
 app.use(cors({
   origin: (origin, callback) => callback(null, true),
   credentials: false,
@@ -36,7 +36,7 @@ app.use(morgan('dev'));
 
 const projectRoot = path.join(__dirname, '..');
 
-// Initialize default medicines if collection is empty
+
 async function initializeMedicines() {
   try {
     const count = await Medicine.countDocuments();
@@ -63,17 +63,16 @@ async function initializeMedicines() {
   }
 }
 
-// Initialize medicines when MongoDB is connected
 mongoose.connection.once('open', async () => {
   await initializeMedicines();
 });
 
-// Also try to initialize if already connected
+
 if (mongoose.connection.readyState === 1) {
   initializeMedicines();
 }
 
-// JWT auth middleware
+//authentucation ke liye
 function auth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -87,16 +86,14 @@ function auth(req, res, next) {
   }
 }
 
-// Require admin role
+// Require uses karre admin role ke kiye
 function requireAdmin(req, res, next) {
   const role = req.user?.role || 'user';
   if (role !== 'admin') return res.status(403).json({ message: 'Admin access required' });
   next();
 }
 
-// Routes
-// API routes must come before static file serving to avoid conflicts
-// API info endpoint (for checking API status)
+
 app.get('/api', (req, res) => {
   res.status(200).json({
     message: 'HealthCare API is running',
@@ -114,7 +111,7 @@ app.get('/api', (req, res) => {
     }
   });
 });
-// Favicon handler to avoid CSP warnings when browser requests /favicon.ico
+// Favicon handler for csp warning avoid karne ke liye
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
@@ -125,7 +122,7 @@ app.post('/api/auth/signup', async (req, res) => {
     if (!fullName || !email || !username || !password) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    // Protect or disable signup unless an admin code is configured
+    // server disable taki koi aur admin dashboard use nahi karna
     if (!ADMIN_SIGNUP_CODE) {
       return res.status(503).json({ message: 'Signup disabled by server' });
     }
@@ -411,7 +408,7 @@ app.get('/api/payments', auth, requireAdmin, async (req, res) => {
   }
 });
 
-// AI Chat endpoint (optional): proxies to OpenAI if OPENAI_API_KEY is set
+// AI Chat endpoint with healthcare information focus
 app.post('/api/ai/chat', async (req, res) => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -422,6 +419,28 @@ app.post('/api/ai/chat', async (req, res) => {
     if (!apiKey) {
       return res.status(503).json({ message: 'AI service unavailable (missing OPENAI_API_KEY)' });
     }
+
+    // Enhanced system message with healthcare context
+    const systemMessage = {
+      role: 'system',
+      content: `You are HealthCare Pro AI Assistant, a helpful medical information provider. You can:
+
+1. **Medical Information**: Provide general health information, symptom analysis, and wellness advice
+2. **Medicine Information**: Share general information about common medicines and their uses
+3. **Appointment Guidance**: Help users understand when to see doctors
+4. **Emergency Guidance**: Provide basic emergency triage information
+
+**IMPORTANT SAFETY RULES**:
+- Always include medical disclaimer: "This is not a substitute for professional medical advice"
+- For emergencies, advise immediate medical attention
+- Never prescribe specific medications or dosages
+- Encourage professional consultation for serious conditions
+
+Focus on providing helpful, accurate health information while maintaining safety guidelines.`
+    };
+
+    const enhancedMessages = [systemMessage, ...messages];
+
     const resp = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -430,15 +449,17 @@ app.post('/api/ai/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
-        messages,
+        messages: enhancedMessages,
         temperature: 0.3,
-        max_tokens: 300
+        max_tokens: 400
       })
     });
+
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
       return res.status(502).json({ message: 'Upstream AI error', detail: data });
     }
+
     const content = data?.choices?.[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response.";
     return res.json({ content });
   } catch (e) {
