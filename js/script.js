@@ -1,4 +1,4 @@
-// DOM Elements
+// Enhanced AI Chatbot with healthcare information focus
 const chatbotToggle = document.getElementById('chatbotToggle');
 const chatbotContainer = document.querySelector('.chatbot-container');
 const minimizeChat = document.getElementById('minimizeChat');
@@ -7,30 +7,50 @@ const userInput = document.getElementById('userInput');
 const sendMessageBtn = document.getElementById('sendMessage');
 const consultationForm = document.getElementById('consultationForm');
 
-// Toggle Chatbot (guard for pages without chatbot)
-if (chatbotToggle && chatbotContainer) {
-    chatbotToggle.addEventListener('click', () => {
-        chatbotContainer.classList.toggle('active');
-    });
-}
-
-// Minimize Chat
-if (minimizeChat && chatbotContainer) {
-    minimizeChat.addEventListener('click', (e) => {
-        e.stopPropagation();
-        chatbotContainer.classList.remove('active');
-    });
-}
-
-// Sample responses for the AI chatbot
+// Enhanced bot responses with healthcare information
 const botResponses = {
-    greetings: ["Hello! How can I assist you today?", "Hi there! What can I help you with?", "Welcome! How can I help with your health concerns?"],
-    help: ["I can provide general health information, suggest home remedies for minor issues, and guide you on when to see a doctor. Please remember I'm not a substitute for professional medical advice.", "I'm here to help with health-related questions. What would you like to know?"],
-    fever: ["For fever, rest and drink plenty of fluids. You can take acetaminophen or ibuprofen to reduce fever. If your temperature is above 103°F (39.4°C) or lasts more than 3 days, please consult a doctor."],
-    headache: ["For headaches, try resting in a quiet, dark room, applying a cool compress, and staying hydrated. Over-the-counter pain relievers may help. If headaches are severe or persistent, please see a doctor."],
-    cold: ["For a common cold, get plenty of rest, drink fluids, and consider over-the-counter cold medications. If symptoms persist beyond 10 days or worsen, consult a healthcare provider."],
-    stomachache: ["For mild stomachaches, try drinking clear fluids, eating bland foods, and avoiding dairy, caffeine, and fatty foods. If pain is severe or persists, seek medical attention."],
-    default: ["I'm sorry, I'm not sure how to help with that. For medical concerns, it's always best to consult with a healthcare professional.", "I don't have enough information about that. Please contact a doctor for specific medical advice."]
+    greetings: [
+        "Hello! I'm your HealthCare Pro AI Assistant. I can provide medical information, symptom analysis, and health guidance. How can I help you today?",
+        "Hi there! I'm here to help with your health questions. I can provide information about symptoms, medicines, and general wellness topics.",
+        "Welcome! I'm your healthcare assistant. I can share medical information, help with symptom analysis, and guide you on when to seek professional care."
+    ],
+    help: [
+        "I can help you with:\n• Medical information and symptom analysis\n• General health and wellness advice\n• Medicine information and guidance\n• When to see a doctor\n• Emergency triage guidance\n\n**Medical Disclaimer**: This is not a substitute for professional medical advice.",
+        "My capabilities include:\n• Symptom analysis and general guidance\n• Health information and wellness tips\n• Medicine information and safety guidance\n• Appointment timing suggestions\n• Emergency guidance\n\nAlways consult healthcare professionals for medical decisions."
+    ],
+    fever: [
+        "For fever: Common causes include viral/bacterial infections and heat exhaustion. Recommendations: Rest, stay hydrated, use fever reducers. **Medical Disclaimer**: This is not a substitute for professional medical advice. Please consult a doctor if temperature is above 103°F (39.4°C) or lasts more than 3 days.",
+        "Fever guidance: Monitor temperature regularly, stay hydrated, rest in cool environment. Over-the-counter medications like acetaminophen or ibuprofen may help. **Important**: Seek immediate medical care for high fever or if accompanied by other severe symptoms."
+    ],
+    headache: [
+        "For headaches: Common causes include stress, dehydration, migraines, and sinus pressure. Recommendations: Rest in quiet dark room, apply cold compress, stay hydrated. **Medical Disclaimer**: This is not a substitute for professional medical advice. Seek immediate care for severe headaches or vision changes.",
+        "Headache relief: Try resting in a dark, quiet room, apply cold compress to forehead, stay hydrated. Over-the-counter pain relievers may help. **Safety Note**: Consult doctor if headaches are severe, sudden, or accompanied by other symptoms."
+    ],
+    cold: [
+        "For cold/flu: Common causes include viral infections. Recommendations: Rest, drink plenty of fluids, use humidifier, consider over-the-counter cold medications. **Medical Disclaimer**: This is not a substitute for professional medical advice. See doctor if symptoms last more than 10 days or worsen.",
+        "Cold and flu care: Stay hydrated, get plenty of rest, use saline nasal spray, consider honey and lemon for sore throat. **Important**: Seek medical attention if breathing becomes difficult or fever is high."
+    ],
+    stomachache: [
+        "For stomach pain: Common causes include indigestion, food poisoning, gastritis. Recommendations: BRAT diet (bananas, rice, applesauce, toast), stay hydrated, avoid spicy foods. **Medical Disclaimer**: This is not a substitute for professional medical advice. Seek immediate care for severe pain or fever.",
+        "Stomach discomfort: Try clear liquids, bland foods, and rest. Avoid dairy, caffeine, and spicy foods. **Safety Note**: Seek emergency care if pain is severe, persistent, or accompanied by fever."
+    ],
+    medicine: [
+        "I can provide general information about medicines including common uses, side effects, and safety precautions. **Medical Disclaimer**: Always consult with healthcare providers before taking any medication. Never share prescription medications.",
+        "Medicine information: I can share general information about common medications, their typical uses, and important safety considerations. **Important**: This information is educational - always follow your doctor's specific instructions."
+    ],
+    appointment: [
+        "I can help you understand when to schedule appointments and what type of specialist might be appropriate for your symptoms. **Medical Disclaimer**: This is guidance only - always consult with healthcare providers for proper diagnosis and treatment.",
+        "Appointment guidance: Based on your symptoms, I can suggest when to seek routine care vs urgent care. I can help you understand what information to prepare for your doctor visit. **Important**: This is not a substitute for professional medical advice."
+    ],
+    emergency: [
+        "🚨 **EMERGENCY GUIDANCE** 🚨\n\nFor life-threatening emergencies (chest pain, difficulty breathing, severe bleeding, loss of consciousness):\n• Call 108 immediately (India Emergency)\n• Don't wait - every second counts\n• Follow emergency operator instructions\n\n**Medical Disclaimer**: This is not a substitute for emergency medical services.",
+        "⚠️ **URGENT MEDICAL ADVICE** ⚠️\n\nIf you're experiencing severe symptoms or medical emergency:\n• Call 108 for immediate emergency assistance\n• Call 102 for ambulance services\n• Go to nearest emergency room\n\n**If in doubt, always seek immediate emergency care.**"
+    ],
+    default: [
+        "I'm your HealthCare Pro AI Assistant. I can provide medical information, symptom analysis, and health guidance. Could you please tell me more about your health concern?",
+        "I'm here to help with your healthcare questions. I can share general medical information, help with symptom analysis, and provide wellness guidance. What specific health topic would you like to know about?",
+        "As your health assistant, I can provide information about symptoms, medicines, general health topics, and when to seek professional care. Please describe your health concern and I'll do my best to help."
+    ]
 };
 
 // Function to add a message to the chat
@@ -44,10 +64,30 @@ function addMessage(message, isUser = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Function to get a random response from the bot
+// Enhanced bot response detection
 function getBotResponse(userMessage) {
     const lowerCaseMessage = userMessage.toLowerCase();
     
+    // Check for emergency keywords first
+    if (lowerCaseMessage.includes('emergency') || lowerCaseMessage.includes('help emergency') || 
+        lowerCaseMessage.includes('chest pain') || lowerCaseMessage.includes('difficulty breathing') ||
+        lowerCaseMessage.includes('severe bleeding') || lowerCaseMessage.includes('unconscious')) {
+        return botResponses.emergency[Math.floor(Math.random() * botResponses.emergency.length)];
+    }
+    
+    // Check for medicine-related queries
+    if (lowerCaseMessage.includes('medicine') || lowerCaseMessage.includes('drug') || 
+        lowerCaseMessage.includes('medication') || lowerCaseMessage.includes('pharmacy')) {
+        return botResponses.medicine[Math.floor(Math.random() * botResponses.medicine.length)];
+    }
+    
+    // Check for appointment-related queries
+    if (lowerCaseMessage.includes('appointment') || lowerCaseMessage.includes('book') || 
+        lowerCaseMessage.includes('schedule') || lowerCaseMessage.includes('doctor visit')) {
+        return botResponses.appointment[Math.floor(Math.random() * botResponses.appointment.length)];
+    }
+    
+    // Standard symptom checks
     if (lowerCaseMessage.includes('hello') || lowerCaseMessage.includes('hi') || lowerCaseMessage.includes('hey')) {
         return botResponses.greetings[Math.floor(Math.random() * botResponses.greetings.length)];
     } else if (lowerCaseMessage.includes('help') || lowerCaseMessage.includes('what can you do')) {
@@ -74,35 +114,37 @@ async function handleUserMessage() {
     addMessage(message, true);
     userInput.value = '';
     
-    // Simulate typing indicator
+    // Show typing indicator
     const typingIndicator = document.createElement('div');
     typingIndicator.classList.add('message', 'bot-message');
     typingIndicator.id = 'typing-indicator';
-    typingIndicator.innerHTML = '<p>Typing...</p>';
+    typingIndicator.innerHTML = '<p>HealthCare AI is thinking...</p>';
     chatMessages.appendChild(typingIndicator);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     try {
-        // Try backend AI first
+        // Try backend AI first with enhanced features
         const base = await resolveApiBase();
         const res = await fetch(`${base}/api/ai/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 messages: [
-                    { role: 'system', content: 'You are a helpful healthcare assistant. Provide concise, general health information, triage guidance, and safety warnings. Always include a short medical disclaimer that this is not a substitute for professional advice.' },
+                    { role: 'system', content: 'You are HealthCare Pro AI Assistant, a helpful medical information provider.' },
                     { role: 'user', content: message }
                 ]
             })
         });
+        
         let botText = '';
         if (res.ok) {
             const data = await res.json();
             botText = data?.content || '';
         } else {
-            // Upstream error or AI not configured -> fallback
+            // Fallback to local responses
             botText = getBotResponse(message);
         }
+        
         document.getElementById('typing-indicator')?.remove();
         addMessage(botText || getBotResponse(message));
     } catch (e) {
@@ -119,6 +161,21 @@ if (sendMessageBtn && userInput) {
         if (e.key === 'Enter') {
             handleUserMessage();
         }
+    });
+}
+
+// Toggle Chatbot (guard for pages without chatbot)
+if (chatbotToggle && chatbotContainer) {
+    chatbotToggle.addEventListener('click', () => {
+        chatbotContainer.classList.toggle('active');
+    });
+}
+
+// Minimize Chat
+if (minimizeChat && chatbotContainer) {
+    minimizeChat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatbotContainer.classList.remove('active');
     });
 }
 
@@ -419,6 +476,7 @@ async function initMedicineStore() {
     }
 }
 
+
 function renderMedicines(meds) {
     const medicineGrid = document.getElementById('medicineGrid');
     if (!medicineGrid) return;
@@ -456,7 +514,7 @@ function renderMedicines(meds) {
     }
 }
 
-// Make functions globally accessible for onclick handlers
+
 window.addToCart = function(medicineId) {
     const medicine = medicines.find(m => m.id === medicineId);
     if (!medicine) {
@@ -483,7 +541,7 @@ window.addToCart = function(medicineId) {
     lsSet('medicine_cart', cart);
     updateCartCount();
     
-    // Show success message with toast-like notification
+    // Show success message with  notification
     const notification = document.createElement('div');
     notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
     notification.style.zIndex = '9999';
@@ -679,7 +737,21 @@ async function processPayment() {
 
 // Initialize medicine store when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMedicineStore);
+    document.addEventListener('DOMContentLoaded', () => {
+        initMedicineStore();
+        // Initialize chatbot welcome message
+        if (chatMessages && chatMessages.children.length <= 1) {
+            setTimeout(() => {
+                addMessage(botResponses.greetings[0], false);
+            }, 500);
+        }
+    });
 } else {
     initMedicineStore();
+    // Initialize chatbot welcome message
+    if (chatMessages && chatMessages.children.length <= 1) {
+        setTimeout(() => {
+            addMessage(botResponses.greetings[0], false);
+        }, 500);
+    }
 }
