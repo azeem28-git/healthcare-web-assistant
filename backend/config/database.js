@@ -15,9 +15,9 @@ const connectDB = async () => {
       console.warn('MongoDB disconnected');
     });
   } catch (error) {
-    console.error('\n❌ MongoDB connection error:', error.message);
-    console.warn('\n⚠️ Server will continue but database operations may fail.');
-    console.log('\n📖 To fix this:');
+    console.error('\n MongoDB connection error:', error.message);
+    console.warn('\n Server will continue but database operations may fail.');
+    console.log('\n To fix this:');
     console.log('   1. Install MongoDB locally OR use MongoDB Atlas (cloud)');
     console.log('   2. See MONGODB_SETUP.md for detailed instructions');
     console.log('   3. Create backend/.env file with MONGODB_URI');

@@ -471,6 +471,106 @@ Focus on providing helpful, accurate health information while maintaining safety
 // This must come AFTER all API routes to avoid conflicts
 app.use(express.static(projectRoot));
 
+// Root route handler for direct URL access
+app.get('/', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'index.html'));
+});
+
+// Handle other direct routes to specific pages
+app.get('/medicine-store.html', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'medicine-store.html'));
+});
+
+app.get('/appointment.html', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'appointment.html'));
+});
+
+app.get('/admin/login.html', (req, res) => {
+  res.sendFile(path.join(projectRoot, 'admin', 'login.html'));
+});
+
+// Completely block admin dashboard access
+app.get('/admin/dashboard.html', (req, res) => {
+  console.log(`🚫 Admin dashboard access blocked: ${req.path} from ${req.ip}`);
+  return res.status(403).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Disabled</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+          }
+          .disabled-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            border: 2px solid #dc3545;
+          }
+          .disabled-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #dc3545;
+          }
+          .disabled-title {
+            color: #dc3545;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+          }
+          .disabled-message {
+            color: #6c757d;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+          }
+          .home-button {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px;
+          }
+          .home-button:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+          }
+        </style>
+      </head>
+      <body>
+        <div class="disabled-container">
+          <div class="disabled-icon">🚫</div>
+          <h1 class="disabled-title">Dashboard Disabled</h1>
+          <p class="disabled-message">
+            The admin dashboard is currently disabled.<br>
+            Please contact the system administrator.
+          </p>
+          <a href="/" class="home-button">
+            🏠 Go to Home Page
+          </a>
+        </div>
+      </body>
+      </html>
+  `);
+});
+
 // Auto-try ports: PORT, PORT+1, PORT+2 (helps when 3000 is busy)
 const basePort = Number(PORT) || 3000;
 const candidatePorts = [basePort, basePort + 1, basePort + 2];

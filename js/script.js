@@ -559,7 +559,7 @@ function updateCartCount() {
 }
 
 function getCartTotal() {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 20);
 }
 
 function renderCart() {
@@ -589,6 +589,7 @@ function renderCart() {
                 <div class="text-end">
                     <strong>₹${((parseFloat(item.price) || 0) * (item.quantity || 0)).toFixed(2)}</strong>
                 </div>
+                
                 <button class="btn btn-sm btn-danger" onclick="window.removeFromCart(${item.id})">
                     <i class="fas fa-trash"></i>
                 </button>

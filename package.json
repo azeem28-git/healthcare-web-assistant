@@ -9,6 +9,7 @@
     "install-backend": "npm --prefix backend install"
   },
   "dependencies": {
-    "mongod": "^2.0.0"
+    "mongod": "^2.0.0",
+    "nodemon": "^3.1.14"
   }
 }
