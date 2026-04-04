@@ -16,13 +16,6 @@ const connectDB = async () => {
     });
   } catch (error) {
     console.error('\n MongoDB connection error:', error.message);
-    console.warn('\n Server will continue but database operations may fail.');
-    console.log('\n To fix this:');
-    console.log('   1. Install MongoDB locally OR use MongoDB Atlas (cloud)');
-    console.log('   2. See MONGODB_SETUP.md for detailed instructions');
-    console.log('   3. Create backend/.env file with MONGODB_URI');
-    console.log('   4. Restart the server\n');
-    // Don't exit - allow server to start and handle errors gracefully
   }
 };
 

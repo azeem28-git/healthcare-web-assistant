@@ -32,6 +32,7 @@
       <a class="nav-link" data-target="#appointments" href="#">Appointments</a>
       <a class="nav-link" data-target="#payments" href="#">Payments</a>
       <a class="nav-link" data-target="#admins" href="#">Admins</a>
+      <a class="nav-link" data-target="#users" href="#">Users</a>
     </nav>
   </aside>
 
@@ -157,11 +158,23 @@
 
     <section id="admins" style="display:none;">
       <div class="card table-card">
-        <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-user-shield me-2"></i>Registered Admins</h5></div>
+        <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-user-shield me-2"></i>Admin Approvals</h5></div>
         <div class="card-body p-0">
           <table class="table align-middle mb-0">
-            <thead class="table-light"><tr><th>Full Name</th><th>Username</th><th>Email</th><th>Created</th></tr></thead>
+            <thead class="table-light"><tr><th>Full Name</th><th>Username</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
             <tbody id="adminsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="users" style="display:none;">
+      <div class="card table-card">
+        <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-users me-2"></i>Registered Users</h5></div>
+        <div class="card-body p-0">
+          <table class="table align-middle mb-0">
+            <thead class="table-light"><tr><th>Full Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -190,20 +203,29 @@
       throw new Error('API not reachable');
     }
     const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    console.log('Token found:', token ? 'Yes' : 'No'); // Debug log
     async function ensureAuth() {
       if (!token) {
+        console.log('No token, redirecting to login'); // Debug log
         return window.location.replace('login.html');
       }
       try {
         const API_BASE = await resolveApiBase();
+        console.log('Checking auth with API_BASE:', API_BASE); // Debug log
         const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+        console.log('Auth response status:', res.status); // Debug log
         if (!res.ok) throw new Error('unauthorized');
         const me = await res.json();
-        if ((me.role || 'user') !== 'admin') {
+        console.log('Auth user data:', me); // Debug log
+        console.log('User data:', me); // Debug log
+        if (!me || (me.role !== 'admin' && me.username !== 'azeem@2811')) {
           throw new Error('forbidden');
         }
-        document.getElementById('adminName').textContent = me.fullName || me.username || 'Admin';
+        // Store current admin data globally
+        window.currentAdmin = me;
+        document.getElementById('adminName').textContent = me.username === 'azeem@2811' ? 'Main Admin' : (me.fullName || me.username || 'Admin');
       } catch (e) {
+        console.log('Auth error:', e); // Debug log
         // invalid token
         localStorage.removeItem('auth_token');
         sessionStorage.removeItem('auth_token');
@@ -212,6 +234,16 @@
     }
     // kick off auth check
     ensureAuth();
+
+    // Logout button handler
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('auth_token');
+            sessionStorage.removeItem('auth_token');
+            // Redirect to main page instead of login page
+            window.location.replace('../index.html');
+        }
+    });
 
     // Sidebar nav switching
     document.querySelectorAll('.nav-link').forEach(a => {
@@ -277,8 +309,112 @@
     }
     function renderAdmins(items){
       const admins = items && items.length ? items : getAdmins();
-      const rows = admins.map(u => `<tr><td>${u.fullName}</td><td>${u.username}</td><td>${u.email}</td><td>${new Date(u.createdAt).toLocaleString()}</td></tr>`).join('');
-      document.getElementById('adminsTableBody').innerHTML = rows || '<tr><td colspan="4" class="text-center text-muted">No admins registered</td></tr>';
+      const rows = admins.map(u => {
+        // Check if current user is main admin
+        const isMainAdmin = window.currentAdmin && window.currentAdmin.username === 'azeem@2811';
+        
+        // Don't show action buttons for main admin himself
+        const isCurrentUser = u.username === (window.currentAdmin ? window.currentAdmin.username : '');
+        
+        // Only main admin can approve/reject others, and not for himself
+        const canApproveReject = isMainAdmin && !isCurrentUser && u.status === 'pending';
+        
+        const actionButtons = canApproveReject
+          ? `<button class="btn btn-sm btn-success me-1" onclick="approveAdmin('${u._id}')">
+              <i class="fa-solid fa-check"></i> Approve
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="rejectAdmin('${u._id}')">
+              <i class="fa-solid fa-times"></i> Reject
+            </button>`
+          : u.status === 'approved'
+          ? '<span class="badge bg-success">Approved</span>'
+          : u.status === 'rejected'
+          ? '<span class="badge bg-danger">Rejected</span>'
+          : u.status === 'pending'
+          ? '<span class="badge bg-warning">Pending</span>'
+          : '<span class="badge bg-primary">Active</span>';
+        
+        return `<tr>
+          <td>${u.fullName}</td>
+          <td>${u.username}</td>
+          <td>${u.email}</td>
+          <td><span class="badge bg-warning">Admin</span></td>
+          <td>${new Date(u.createdAt).toLocaleString()}</td>
+          <td>${actionButtons}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('adminsTableBody').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No admins registered</td></tr>';
+    }
+
+    function renderUsers(items){
+      const users = items && items.length ? items : [];
+      const rows = users.map(u => {
+        const statusBadge = u.status === 'approved' 
+          ? '<span class="badge bg-success">Approved</span>'
+          : u.status === 'rejected'
+          ? '<span class="badge bg-danger">Rejected</span>'
+          : u.status === 'pending'
+          ? '<span class="badge bg-warning">Pending</span>'
+          : '<span class="badge bg-primary">Active</span>';
+        
+        const roleBadge = u.role === 'admin' 
+          ? '<span class="badge bg-warning">Admin</span>'
+          : '<span class="badge bg-info">User</span>';
+        
+        return `<tr>
+          <td>${u.fullName}</td>
+          <td>${u.username}</td>
+          <td>${u.email}</td>
+          <td>${roleBadge}</td>
+          <td>${statusBadge}</td>
+          <td>${new Date(u.createdAt).toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('usersTableBody').innerHTML = rows || '<tr><td colspan="6" class="text-center text-muted">No users registered</td></tr>';
+    }
+
+    // Approve admin function
+    async function approveAdmin(adminId) {
+      if (!confirm('Are you sure you want to approve this admin?')) return;
+      
+      try {
+        const API_BASE = await resolveApiBase();
+        const res = await fetch(`${API_BASE}/api/admins/${adminId}/approve`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')}` }
+        });
+        
+        if (res.ok) {
+          alert('Admin approved successfully!');
+          loadData(); // Refresh data
+        } else {
+          alert('Failed to approve admin');
+        }
+      } catch (error) {
+        alert('Error approving admin');
+      }
+    }
+
+    // Reject admin function
+    async function rejectAdmin(adminId) {
+      if (!confirm('Are you sure you want to reject this admin?')) return;
+      
+      try {
+        const API_BASE = await resolveApiBase();
+        const res = await fetch(`${API_BASE}/api/admins/${adminId}/reject`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')}` }
+        });
+        
+        if (res.ok) {
+          alert('Admin rejected successfully!');
+          loadData(); // Refresh data
+        } else {
+          alert('Failed to reject admin');
+        }
+      } catch (error) {
+        alert('Error rejecting admin');
+      }
     }
     function renderPayments(items){
       lastPayments = items || [];
@@ -310,30 +446,35 @@
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const API_BASE = await resolveApiBase();
-        const [cRes, aRes, pRes, uRes] = await Promise.all([
+        const [cRes, aRes, pRes, uRes, usersRes] = await Promise.all([
           fetch(`${API_BASE}/api/consults`, { headers }),
           fetch(`${API_BASE}/api/appointments`, { headers }),
           fetch(`${API_BASE}/api/payments`, { headers }),
-          fetch(`${API_BASE}/api/admins`, { headers })
+          fetch(`${API_BASE}/api/admins`, { headers }),
+          fetch(`${API_BASE}/api/users`, { headers })
         ]);
         let consults = [];
         let appointments = [];
         let payments = [];
         let admins = [];
+        let users = [];
         if (cRes.ok) { const cj = await cRes.json(); consults = cj.items || []; }
         if (aRes.ok) { const aj = await aRes.json(); appointments = aj.items || []; }
         if (pRes.ok) { const pj = await pRes.json(); payments = pj.items || []; }
         if (uRes.ok) { const uj = await uRes.json(); admins = uj.items || []; }
+        if (usersRes.ok) { const usersj = await usersRes.json(); users = usersj.items || []; }
         if (consults.length === 0) consults = getConsults();
         if (appointments.length === 0) appointments = getAppointments();
         if (payments.length === 0) payments = getPayments();
         renderAdmins(admins);
+        renderUsers(users);
         renderConsults(consults);
         renderAppointments(appointments);
         renderPayments(payments);
         updatePatientCount();
       } catch (e) {
         renderAdmins(getAdmins());
+        renderUsers([]);
         renderConsults(getConsults());
         renderAppointments(getAppointments());
         renderPayments(getPayments());
